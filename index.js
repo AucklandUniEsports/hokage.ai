@@ -1,6 +1,7 @@
 import 'dotenv/config';
 import { Client, Events, IntentsBitField } from 'discord.js';
 import { hokageAnnouncement, hokageReply } from './hokage.js';
+import { specialUsers } from './special-users.js';
 
 
 const client = new Client({
@@ -62,8 +63,10 @@ client.on(Events.MessageCreate, async (message) => {
 		return;
 	}
 
+	const special = specialUsers[message.author.id];
+	const singledOut = special?.alwaysRespond && Math.random() < (special.chance ?? 1);
 	const buttingIn = Math.random() < BUTT_IN_CHANCE;
-	if (!buttingIn && !(await isTalkingToHokage(message))) return;
+	if (!singledOut && !buttingIn && !(await isTalkingToHokage(message))) return;
 
 	const text = message.content
 		.replace(/<@!?\d+>/g, '')
@@ -73,7 +76,7 @@ client.on(Events.MessageCreate, async (message) => {
 	// Pretend to "think" so it feels like a real person typing.
 	await message.channel.sendTyping();
 	setTimeout(() => {
-		message.reply(hokageReply(text)).catch(console.error);
+		message.reply(hokageReply(text, message.author.id)).catch(console.error);
 	}, 800 + Math.random() * 1500);
 });
 

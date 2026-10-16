@@ -1,5 +1,7 @@
 // auec hokage, as played by a customer support rep who was handed the name tag.
 
+import { specialUsers } from './special-users.js';
+
 const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
 const ticket = () => `#${Math.floor(100000 + Math.random() * 900000)}`;
@@ -228,7 +230,10 @@ const announcements = [
 	() => 'Can whoever took my stapler please return it to the auec hokage desk.',
 ];
 
-export function hokageReply(text) {
+export function hokageReply(text, userId) {
+	const special = specialUsers[userId];
+	if (special?.replies?.length) return pick(special.replies);
+
 	const rule = rules.find((r) => r.match.test(text));
 	return pick(rule ? rule.replies : fallbacks)();
 }
